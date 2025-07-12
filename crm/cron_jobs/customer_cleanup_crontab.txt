@@ -1,6 +1,2 @@
-# Exécute le nettoyage des clients inactifs tous les jours à minuit
-# m h  dom mon dow   command
-0 0 * * * /path/to/alx-backend-graphql_crm/crm/cron_jobs/clean_inactive_customers.sh >> /var/log/customer_cleanup.log 2>&1
 
-# Pour les tests : exécution toutes les 5 minutes
-# */5 * * * * /path/to/alx-backend-graphql_crm/crm/cron_jobs/clean_inactive_customers.sh >> /var/log/customer_cleanup.log 2>&1
+0 2 * * 0 /path/to/alx-backend-graphql_crm/crm/cron_jobs/clean_inactive_customers.sh
