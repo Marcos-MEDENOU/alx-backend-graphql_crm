@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',  # Ajout de django-crontab
     # Vos applications ici
 ]
 
@@ -90,3 +91,17 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Django Crontab Configuration
+CRONJOBS = [
+    ('*/5 * * * *', 'crm.cron.log_crm_heartbeat'),
+]
+
+# Optional: Store logs in a specific directory
+CRONTAB_COMMAND_PREFIX = f'cd {BASE_DIR} && '
+
+# Optional: Python path to use for crontab
+CRONTAB_PYTHON_EXECUTABLE = 'python3'
+
+# Optional: Mail settings for crontab output
+CRONTAB_MAILTO = 'admin@example.com'
