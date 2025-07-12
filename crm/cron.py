@@ -4,20 +4,18 @@ Cron jobs for the CRM application.
 from datetime import datetime
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
+import os
 
 def log_crm_heartbeat():
     """
     Log a heartbeat message and verify GraphQL endpoint.
     """
-    # Format the timestamp
     timestamp = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
     log_message = f"{timestamp} CRM is alive\n"
     
-    # Log to file
     with open('/tmp/crm_heartbeat_log.txt', 'a', encoding='utf-8') as f:
         f.write(log_message)
     
-    # Optional: Verify GraphQL endpoint
     try:
         transport = RequestsHTTPTransport(
             url="http://localhost:8000/graphql",
@@ -42,41 +40,30 @@ def update_low_stock():
     Update low stock products by executing a GraphQL mutation.
     Logs the updates to a file.
     """
-    from datetime import datetime
-    from gql import gql, Client
-    from gql.transport.requests import RequestsHTTPTransport
-    import json
-    
-    # Setup GraphQL client
-    transport = RequestsHTTPTransport(
-        url="http://localhost:8000/graphql",
-        use_json=True,
-    )
-    client = Client(transport=transport, fetch_schema_from_transport=True)
-    
-    # Define the mutation
-    mutation = gql("""
-    mutation UpdateLowStock($amount: Int!) {
-        updateLowStockProducts(restockAmount: $amount) {
-            success
-            message
-            updatedProducts {
-                id
-                name
-                stock
+    try:
+        transport = RequestsHTTPTransport(
+            url="http://localhost:8000/graphql",
+            use_json=True,
+        )
+        client = Client(transport=transport, fetch_schema_from_transport=True)
+        
+        mutation = gql("""
+        mutation UpdateLowStock($amount: Int!) {
+            updateLowStockProducts(restockAmount: $amount) {
+                success
+                message
+                updatedProducts {
+                    id
+                    name
+                    stock
+                }
             }
         }
-    }
-    """)
-    
-    try:
-        # Execute the mutation
+        """)
+        
         result = client.execute(mutation, variable_values={"amount": 10})
         
-        # Get the current timestamp
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # Prepare log message
         log_message = f"\n=== Low Stock Update - {timestamp} ===\n"
         
         if result.get('updateLowStockProducts', {}).get('success'):
@@ -92,7 +79,6 @@ def update_low_stock():
         else:
             log_message += "Error: Failed to update low stock products\n"
         
-        # Write to log file
         with open('/tmp/low_stock_updates_log.txt', 'a', encoding='utf-8') as f:
             f.write(log_message)
             

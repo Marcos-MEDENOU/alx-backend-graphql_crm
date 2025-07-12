@@ -1,7 +1,7 @@
 import graphene
 from graphene_django import DjangoObjectType
 from django.db.models import F
-from .models import Product  # Assurez-vous d'importer votre modèle Product
+from .models import Product
 
 class ProductType(DjangoObjectType):
     class Meta:
@@ -31,8 +31,8 @@ class UpdateLowStockProducts(graphene.Mutation):
         # Mettre à jour le stock des produits
         updated_products = []
         for product in low_stock_products:
-            product.stock = F('stock') + restock_amount
-            product.save()
+            # Utiliser F() pour éviter les conditions de course
+            Product.objects.filter(pk=product.pk).update(stock=F('stock') + restock_amount)
             # Rafraîchir l'objet pour obtenir les valeurs mises à jour
             product.refresh_from_db()
             updated_products.append(product)
@@ -46,4 +46,7 @@ class UpdateLowStockProducts(graphene.Mutation):
 class Mutation(graphene.ObjectType):
     update_low_stock_products = UpdateLowStockProducts.Field()
 
-schema = graphene.Schema(mutation=Mutation)
+class Query(graphene.ObjectType):
+    hello = graphene.String(default_value="Hi!")
+
+schema = graphene.Schema(query=Query, mutation=Mutation)

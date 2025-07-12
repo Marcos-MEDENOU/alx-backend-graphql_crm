@@ -20,7 +20,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_crontab',  # Ajout de django-crontab
+    'django_crontab',
+    'graphene_django',
+    'crm',  # Ajout de l'application crm
     # Vos applications ici
 ]
 
@@ -92,10 +94,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# GraphQL Configuration
+GRAPHENE = {
+    'SCHEMA': 'crm.schema.schema'
+}
+
 # Django Crontab Configuration
 CRONJOBS = [
     ('*/5 * * * *', 'crm.cron.log_crm_heartbeat'),
-    ('0 */12 * * *', 'crm.cron.update_low_stock'),  # Toutes les 12 heures
+    ('0 */12 * * *', 'crm.cron.update_low_stock'),
 ]
 
 # Optional: Store logs in a specific directory
