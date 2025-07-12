@@ -1,32 +1,29 @@
 #!/bin/bash
 
-# Get the current timestamp
-TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 
-# Execute Django management command to delete inactive customers
-DELETED_COUNT=$(python manage.py shell -c "
-from django.utils import timezone
-from datetime import timedelta
-from crm.models import Customer
+# Change to the project root directory
+cd "$PROJECT_ROOT" || exit 1
 
-# Calculate date one year ago
-one_year_ago = timezone.now() - timedelta(days=365)
+# Print current working directory for debugging
+pwd
 
-# Find customers with no orders since one year ago
-customers_to_delete = Customer.objects.filter(
-    orders__isnull=True
-) | Customer.objects.exclude(
-    orders__created_at__gte=one_year_ago
-)
+# Activate virtual environment if exists
+if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
+elif [ -f "../venv/bin/activate" ]; then
+    source ../venv/bin/activate
+fi
 
-# Count and delete inactive customers
-count = customers_to_delete.distinct().count()
-if count > 0:
-    customers_to_delete.distinct().delete()
-    print(count)
-else:
-    print(0)
-")
+# Execute the Django management command
+python manage.py clean_inactive_customers
 
-# Log the result with timestamp
-echo "[$TIMESTAMP] Deleted $DELETED_COUNT inactive customers" >> /tmp/customer_cleanup_log.txt
+# Store the exit status
+status=$?
+
+# Change back to the original directory
+cd - > /dev/null || exit 1
+
+exit $status
