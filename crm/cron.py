@@ -7,9 +7,7 @@ from gql.transport.requests import RequestsHTTPTransport
 import os
 
 def log_crm_heartbeat():
-    """
-    Log a heartbeat message and verify GraphQL endpoint.
-    """
+    """Log a heartbeat message and verify GraphQL endpoint."""
     timestamp = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
     log_message = f"{timestamp} CRM is alive\n"
     
@@ -38,8 +36,11 @@ def log_crm_heartbeat():
 def update_low_stock():
     """
     Update low stock products by executing a GraphQL mutation.
-    Logs the updates to a file.
+    Logs the updates to /tmp/lowstockupdates_log.txt
     """
+    log_file = '/tmp/lowstockupdates_log.txt'
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     try:
         transport = RequestsHTTPTransport(
             url="http://localhost:8000/graphql",
@@ -48,7 +49,7 @@ def update_low_stock():
         client = Client(transport=transport, fetch_schema_from_transport=True)
         
         mutation = gql("""
-        mutation UpdateLowStock($amount: Int!) {
+        mutation UpdateStock($amount: Int!) {
             updateLowStockProducts(restockAmount: $amount) {
                 success
                 message
@@ -63,12 +64,11 @@ def update_low_stock():
         
         result = client.execute(mutation, variable_values={"amount": 10})
         
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         log_message = f"\n=== Low Stock Update - {timestamp} ===\n"
         
         if result.get('updateLowStockProducts', {}).get('success'):
             updated_products = result['updateLowStockProducts'].get('updatedProducts', [])
-            log_message += f"Success: {result['updateLowStockProducts']['message']}\n"
+            log_message += f"{result['updateLowStockProducts']['message']}\n"
             
             if updated_products:
                 log_message += "Updated products:\n"
@@ -79,13 +79,13 @@ def update_low_stock():
         else:
             log_message += "Error: Failed to update low stock products\n"
         
-        with open('/tmp/low_stock_updates_log.txt', 'a', encoding='utf-8') as f:
+        with open(log_file, 'a', encoding='utf-8') as f:
             f.write(log_message)
             
         return log_message
         
     except Exception as e:
         error_message = f"Error in update_low_stock: {str(e)}"
-        with open('/tmp/low_stock_updates_log.txt', 'a', encoding='utf-8') as f:
-            f.write(f"\n=== Error - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===\n{error_message}\n")
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write(f"\n=== Error - {timestamp} ===\n{error_message}\n")
         return error_message
