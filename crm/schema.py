@@ -10,13 +10,13 @@ class ProductType(DjangoObjectType):
 
 class UpdateLowStockProducts(graphene.Mutation):
     class Arguments:
-        restock_amount = graphene.Int(required=True)
+        restockAmount = graphene.Int(required=True)
     
     success = graphene.Boolean()
     message = graphene.String()
     updated_products = graphene.List(ProductType)
 
-    def mutate(self, info, restock_amount):
+    def mutate(self, info, restockAmount):
         # Trouver les produits avec un stock inférieur à 10
         products_to_update = Product.objects.filter(stock__lt=10)
         
@@ -31,7 +31,7 @@ class UpdateLowStockProducts(graphene.Mutation):
         updated_products = []
         for product in products_to_update:
             # Utiliser F() pour éviter les conditions de course
-            Product.objects.filter(pk=product.pk).update(stock=F('stock') + restock_amount)
+            Product.objects.filter(pk=product.pk).update(stock=F('stock') + restockAmount)
             # Rafraîchir l'objet pour obtenir les valeurs mises à jour
             product.refresh_from_db()
             updated_products.append(product)

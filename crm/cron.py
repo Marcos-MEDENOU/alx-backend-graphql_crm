@@ -50,10 +50,10 @@ def update_low_stock():
         
         mutation = gql("""
         mutation UpdateStock($amount: Int!) {
-            updateLowStockProducts(restockAmount: $amount) {
+            update_low_stock_products(restockAmount: $amount) {
                 success
                 message
-                updatedProducts {
+                updated_products {
                     id
                     name
                     stock
@@ -66,9 +66,9 @@ def update_low_stock():
         
         log_message = f"\n=== Low Stock Update - {timestamp} ===\n"
         
-        if result.get('updateLowStockProducts', {}).get('success'):
-            updated_products = result['updateLowStockProducts'].get('updatedProducts', [])
-            log_message += f"{result['updateLowStockProducts']['message']}\n"
+        if result.get('update_low_stock_products', {}).get('success'):
+            updated_products = result['update_low_stock_products'].get('updated_products', [])
+            log_message += f"{result['update_low_stock_products']['message']}\n"
             
             if updated_products:
                 log_message += "Updated products:\n"

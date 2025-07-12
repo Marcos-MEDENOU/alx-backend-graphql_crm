@@ -124,11 +124,11 @@ CRONJOBS = [
     ('0 */12 * * *', 'crm.cron.update_low_stock'),
 ]
 
-# Optional: Store logs in a specific directory
-CRONTAB_COMMAND_PREFIX = f'cd {BASE_DIR} && '
+# Utiliser le chemin complet vers Python
+CRONTAB_PYTHON_EXECUTABLE = '/usr/bin/python3'  # Ajustez selon votre système
 
-# Optional: Python path to use for crontab
-CRONTAB_PYTHON_EXECUTABLE = 'python3'
+# Stocker la sortie des jobs dans un fichier de log
+CRONTAB_COMMAND_PREFIX = f'cd {BASE_DIR} && . venv/bin/activate && '  # Si vous utilisez un environnement virtuel
 
-# Optional: Mail settings for crontab output
+# Envoyer les erreurs par email
 CRONTAB_MAILTO = 'admin@example.com'
